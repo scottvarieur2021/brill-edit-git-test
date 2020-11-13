@@ -1,22 +1,72 @@
 import React from "react"
-import { Link } from "gatsby"
-
+import { graphql } from "gatsby"
 import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
+import SliceZone from "../components/sliceZone"
 
-const IndexPage = () => (
-  <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
-    </div>
-    <Link to="/page-2/">Go to page 2</Link> <br />
-    <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
-  </Layout>
-)
+export const query = graphql`
+  {
+    prismic {
+      allHomepages {
+        edges {
+          node {
+            body {
+              ... on PRISMIC_HomepageBodyHero {
+                type
+                primary {
+                  hero_content
+                  hero_title
+                  background_image
+                }
+              }
+              ... on PRISMIC_HomepageBodyCall_to_action_grid {
+                type
+                fields {
+                  cta_block_page_link {
+                    ... on PRISMIC_Page {
+                      page_title
+                      pageContent
+                      _meta {
+                        uid
+                      }
+                    }
+                  }
+                  call_to_action_block_button
+                  call_to_action_block_content
+                  call_to_action_block_image
+                  call_to_action_block_title
+                }
+                primary {
+                  section_title
+                }
+              }
+              ... on PRISMIC_HomepageBodyPrice_list {
+                type
+                fields {
+                  price_list_block_description
+                  price_list_block_title
+                  price_per_month
+                  price_type
+                }
+                primary {
+                  title
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+const IndexPage = props => {
+  console.log("///from index.js//////////", props.data)
+  const body = props.data.prismic.allHomepages.edges[0].node.body
+  return (
+    <Layout>
+      <SliceZone body={body} />
+    </Layout>
+  )
+}
 
 export default IndexPage
